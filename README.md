@@ -12,7 +12,11 @@ Use this project repo to share Jupyter Notebook examples. The goal here is to sh
 # get the exoerience information
 # group by company and experience then get the avg salary
 # unstack the results to move the experience as columns to create the series
-experience = dfValidCompanies.groupby(["CompanyType","YearsProgram"])['Salary'].mean().rename("Salary").sort_values(ascending=False).sort_index().unstack()
+experience = dfValidCompanies.groupby(["CompanyType","YearsProgram"])['Salary']
+    .mean().rename("Salary")
+    .sort_values(ascending=False).sort_index()
+    .unstack()
+    
 experience.head()
 
 # create the clustered chart
