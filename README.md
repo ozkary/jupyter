@@ -31,4 +31,39 @@ plot.xaxis.grid(False)
 
 ```
 
-<img src="clustered.png" alt="Clustered Chart">
+<img src="ozkary-python-clustered-bar.png" alt="Clustered Chart">
+
+
+### Horizontal Bar Chart
+
+```python
+
+
+# for each row, check of the MajorUndergrad is computer related
+def isComputerRelated(row):
+    value = row["MajorUndergrad"].lower()
+    return "Computer" if value.find("computer") > -1  else "Non-Computer"
+
+dfCompRelated = dfUSA[["Salary","MajorUndergrad"]].copy()   # get a copy of the dataframe and add the ComputerRelated column
+dfCompRelated["ComputerRelated"] = dfCompRelated.apply(isComputerRelated, axis=1)  #apply a function call to each row
+compRelAvg = dfCompRelated.groupby("ComputerRelated")['Salary'].mean().sort_values(ascending=False)  # get the avg for each category
+
+# horizontal bar chart with colors
+plot = compRelAvg.plot(kind='barh', figsize=(10, 7), color=['g','b'])
+
+# set the axis and title labels
+plot.set_ylabel('Undergraduate Degree', labelpad=20)
+plot.set_xlabel('Salary ($)', labelpad=20)
+plot.set_title('Computer vs Non-Computer Undergraduate Avg ', pad=30, fontsize=20)
+plot.set_xticklabels(['{:,.0f}'.format(v) for v in plot.get_xticks()])  # format the x series
+
+# annotate the bars with the total amount
+for p in plot.patches:
+    b = p.get_bbox()        
+    value = "${:,.0f}".format(b.x1)
+    # plot.annotate(str(value), (b.x1, b.y1 + -.2 ), fontsize=20)
+    plot.text(b.x1 * .80, p.get_y()+ .2,str(value), fontsize=20, color='#ffffff')   # add a value at the end of the bar
+
+```
+
+<img src="ozkary-barh-degree-salary-compare.png" alt="Clustered Chart">
