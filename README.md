@@ -67,3 +67,49 @@ for p in plot.patches:
 ```
 
 <img src="ozkary-barh-degree-salary-compare.png" alt="Clustered Chart">
+
+### Horizontal Bar Chart with Annotations and Sorting
+
+Use: <a href="yearsOfExperienceAnalysis.ipynb">yearsOfExperienceAnalysis.ipynb</a>
+
+```python
+
+
+# for each row, transform MajorUndergrad to computer or non-computer
+def isComputerRelated(row):
+    value = row["MajorUndergrad"].lower()
+    return "Computer" if value.find("computer") > -1  else "Non-Computer"
+
+# transformed the yearsProgram to a numeric series to allow for sorting
+def setExperienceOrder(row):
+    value = row["YearsProgram"][0:2].lower().strip()
+    return 0 if value.find("le") > -1  else int(value)
+
+dfCompRelated = dfUSA[["Salary","MajorUndergrad", "YearsProgram"]].copy()
+dfCompRelated["ComputerRelated"] = dfCompRelated.apply(isComputerRelated, axis=1)  # add the computer related column
+
+# group by yearsprogram and computer related. By default, the new column is index. remove the index.
+# Also move the computer related rows to column (unstack) 
+compRelAvg = dfCompRelated.groupby(["YearsProgram","ComputerRelated"], as_index=True)['Salary'].mean().unstack().reset_index()
+compRelAvg["ExperienceOrder"] = compRelAvg.apply(setExperienceOrder, axis=1)  
+compRelAvg = compRelAvg.sort_values(by='ExperienceOrder', ascending=True)
+
+# horizontal bar chart with colors
+plot = compRelAvg.plot(kind='barh',x="YearsProgram",y=['Computer','Non-Computer'],figsize=(20, 30), color=['g','b'], width=.8)
+
+# set the axis and title labels
+plot.set_ylabel('Undergraduate Degree', labelpad=20)
+plot.set_xlabel('Salary ($)', labelpad=20)
+plot.set_title('Computer vs Non-Computer Undergraduate Avg ', pad=30, fontsize=20)
+plot.set_xticklabels(['{:,.0f}'.format(v) for v in plot.get_xticks()])  # format the x series
+
+# annotate the bars with the total amount
+for p in plot.patches:
+    b = p.get_bbox()        
+    value = "${:,.0f}".format(b.x1)
+    # plot.annotate(str(value), (b.x1, b.y1 + -.2 ), fontsize=20)
+    plot.text(b.x1 * .75, p.get_y() + .1 ,str(value), fontsize=20, color='#ffffff')   # add a value at the end of the bar
+
+```
+
+<img src="ozkary-barh-years-experience.png" alt="Clustered Chart">
